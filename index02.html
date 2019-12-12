@@ -1,0 +1,139 @@
+﻿<!DOCTYPE html>
+<html>
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">    
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<title>HTML Stopping Video Player</title> 
+		<script language="javascript" type="text/javascript" src="stops.js"></script>
+		<script>
+'use strict';
+var media;
+var lastTime;
+var currTime;
+var frame;
+
+function doSetup() {
+	console.log("Page is loaded");	
+	media = document.getElementById("media");  // media is global
+	frame = document.getElementById("frame");  // frame is global
+
+	var milliSeconds = 200;
+	setInterval(myTimer, milliSeconds);  // start a timer, that periodically calls myTimer()
+	
+	lastTime = 0;  // lastTime is global
+	
+	window.addEventListener('message', event => {
+		console.log("Parent has got message from child: " + event.data);
+		if( event.data == "OK") {
+			// Continue playing and make iframe invisible
+			frame.style.display = "none";    // hide the iframe
+			media.style.display = "block";    // show the video						
+			media.play(); 
+		}
+	}); 
+	
+	// hide the iframe
+	frame.style.display = "none";    
+	
+	// this event handler informs about the end of the video
+	media.onended = function() {
+		alert("The End.\n\nVideo by Ruvim Miksanskiy from Pexels.");
+	};
+	
+	// this onclick handler starts or stops the video
+	media.onclick = function() {
+		if(media.paused ) {
+			media.play();
+		} else {
+			media.pause();
+		}
+	};
+}
+
+function myTimer() {
+	currTime = media.currentTime;  // currTime is global
+	
+	callPageIfStopBetween(lastTime, currTime);
+	 
+	lastTime = currTime;
+}
+
+function callPageIfStopBetween(t1, t2) {
+	var n = stops.length; 
+	for(var i  = 0; i < n; i++) {
+		if(stops[i][0] > t1 && stops[i][0] <= t2) {
+			//console.log("Stop with page = " + stops[i][1]);
+			
+			// Pause the player, make iframe visible and load page into iframe
+			media.pause(); 
+			//frame = document.getElementById("frame");  // frame is global
+			//frame.src = "test.html";     // Test
+			frame.src = stops[i][1];
+			
+			frame.style.display = "block";    // show the iframe
+			//media.style.display = "none";    // hide the video
+		}
+	}	
+}
+		</script>
+		<style type="text/css">
+			html{ 
+				height: 100%;
+			}
+			body{ 
+				margin: 0px;
+				padding: 0px;
+				width: 100%;
+				height: 98%;
+				background: #ddc;
+				color: #000;   /* Font color */
+			}
+			#media{ 
+				position: absolute;
+				left: 0;
+				top: 0;
+				border: 0; 
+				width:100%; 
+				height: 100%;
+			}	
+			#frame{ 
+				position: absolute;
+				left: 0;
+				top: 0;
+				display: none;
+				position: fixed;
+				border: 0; 
+				width: 100vw; 
+				height: 100vh;
+			}
+		</style>
+	</head>
+	<body onload="doSetup()">
+	<!--<h1>Making of: Stopping Video Player</h1>
+	<p><i>by J. Grätzer, Germany, 2019</i></p>
+
+	<h2>Step 7</h2>
+
+	<p>This page shows the video fullscreen. So there shoud be no text.
+	-->
+	<p>
+	<video width="640" height="360" id="media">
+		<source src="video_640x360.mp4" type="video/mp4">
+		Your browser does not support the video tag.
+	</video>
+
+	<!--<p><i>Video by Ruvim Miksanskiy from Pexels</i>
+	-->
+	
+	<p>
+	<iframe src="empty.html" id="frame">
+		Your browser does not support iframes.
+	</iframe>
+	
+	<!--<p><b>
+	<a href="../step07/index.html">&lt;back</a>
+	</b>
+	-->
+	
+	</body>
+</html>
